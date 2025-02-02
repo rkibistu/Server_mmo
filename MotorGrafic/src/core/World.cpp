@@ -6,8 +6,9 @@
 #include "SceneManager.h"
 #include <components/CameraInput.h>
 
-#include "MemoryDebug.h"
+#include "server/Server.h"
 
+#include "MemoryDebug.h"
 
 World::World() {
 
@@ -30,6 +31,8 @@ void World::Init(std::string resourceXmlFilepath, std::string sceneXmlFilepath) 
 
 	ResourceManager::GetInstance().ParseFile(resourceXmlFilepath);
 	SceneManager::GetInstance().ParseFile(sceneXmlFilepath);
+	
+	Server::GetInstance().Init();
 
 	_groundPlane = SceneManager::GetInstance().CreateUsingModel("test", "4_plane", "1", rml::Vector3(0, 0, 0), rml::Vector3(0, 0, 0), rml::Vector3(30, 1, 30), ObjectMovementType::SEMI_STATIC, nullptr);
 	_line = SceneManager::GetInstance().CreateUsingMesh("test", "2_line", "color", rml::Vector3(0, 0, 0), rml::Vector3(0, 0, 0), rml::Vector3(2, 2, 2), ObjectMovementType::SEMI_STATIC, nullptr);
@@ -69,6 +72,7 @@ void World::FrameEnd() {
 }
 
 void World::Destroy() {
+	Server::GetInstance().DestroyInstance();
 	ResourceManager::GetInstance().DestroyInstance();
 	SceneManager::GetInstance().DestroyInstance();
 
@@ -156,32 +160,16 @@ void World::ComputeFrameDeltaTime() {
 
 void World::LoopUpdate() {
 
-	if (Engine::HasGraphics()) {
-		// Polls the events
-		_window->PollEvents();
-	}
-
 
 	// Compute delta time
 	ComputeFrameDeltaTime();
 
-	// Calls the methods of the instance of InputController in the following order
-	// OnWindowResize, OnMouseMove, OnMouseBtnPress, OnMouseBtnRelease, OnMouseScroll, OnKeyPress, OnMouseScroll, OnInputUpdate
-	// OnInputUpdate will be called each frame, the other functions are called only if an event is registered
-	if (Engine::HasGraphics()) {
-		_window->UpdateObservers();
-	}
+	Server::GetInstance().CheckIncomingTraffic();
 
 	//Frame processing
 	FrameStart();
 	Update(static_cast<float>(_deltaTime));
-	if (Engine::HasGraphics()) {
-		Draw();
-	}
 	FrameEnd();
 
-	//Display image on screen
-	if (Engine::HasGraphics()) {
-		_window->SwapBuffers();
-	}
+
 }
