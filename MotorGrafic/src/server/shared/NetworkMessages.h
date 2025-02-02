@@ -12,12 +12,18 @@ enum NetworkTags {
 	Invalid
 };
 
+struct NetworkPackage {
+	int Length; // length without the bytes of the length. Everything after length
+	NetworkTags Tag;
+	std::string Content;
+};
+
 class NetworkMessages {
 public:
 
 	static std::string PrepareMessage(NetworkTags tag, std::string content);
 
-	static void ParseMessage(std::string message, int& length, NetworkTags& tag, std::string& content);
+	static void ParseMessage(std::string message, std::vector< NetworkPackage>& packages);
 
 	static NetworkTags FromString(std::string tag) {
 		if (tag == "JoinGameRequest") {
@@ -30,6 +36,12 @@ public:
 			return NetworkTags::Invalid;
 		}
 	}
+
+private:
+	// a part of the previous recv buffer that was not compelte so was not parsed
+	// it is used in the next parsing to combine and create a new message
+	static std::string _remainingMessage;
+	static bool _shouldComplete;
 };
 
 
@@ -64,23 +76,19 @@ struct JoinGameRequestData {
 struct JoinGameResponseData {
 	int Id;
 
-	// Constructor
 	JoinGameResponseData(int id) : Id(id) {}
 
-	// Constructor for deserialization
 	JoinGameResponseData(const std::string& serializedData) {
 		nlohmann::json j = nlohmann::json::parse(serializedData);
 		Id = j["Id"];
 	}
 
-	// Serialize the object to a JSON string
 	std::string Serialize() const {
 		nlohmann::json j;
 		j["Id"] = Id;
 		return j.dump();
 	}
 
-	// Deserialize a JSON string to an object
 	static JoinGameResponseData Deserialize(const std::string& data) {
 		nlohmann::json j = nlohmann::json::parse(data);
 		return { (int)j["Id"] };
