@@ -1,0 +1,7 @@
+# Blender 4.2.3 LTS
+# www.blender.org
+mtllib line.mtl
+o Plane
+v 0.000000 0.000000 0.000000
+v 0.000000 0.000000 -2.000000
+l 2 1

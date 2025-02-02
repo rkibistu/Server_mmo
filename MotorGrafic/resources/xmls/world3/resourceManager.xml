@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resourceManager>
+  <models>
+    <folder path="resources/models/3d-cubes-master/">
+      <model id="1">
+        <file>cube-tex.obj</file>
+      </model>
+    </folder>
+    <folder path="resources/models/multiple-cubes/">
+      <model id="2">
+        <file>multiple-cubes.obj</file>
+      </model>
+    </folder>
+    <folder path="resources/models/primitives/">
+      <model id="3">
+        <file>cube.obj</file>
+      </model>
+      <model id="4_plane">
+        <file>plane.obj</file>
+      </model>
+    </folder>
+  </models>
+  <shaders>
+    <folder path="resources/shaders/">
+      <shader id="1">
+        <vs>BasicVS.vert</vs>
+        <fs>BasicFS.frag</fs>
+      </shader>
+      <shader id="2">
+        <vs>LightDebugVS.vert</vs>
+        <fs>LightDebugFS.frag</fs>
+      </shader>
+      <shader id="3">
+        <vs>LightedObjectVS.glsl</vs>
+        <fs>LightedObjectFS.glsl</fs>
+      </shader>
+      <shader id="color">
+        <vs>ColorVS.glsl</vs>
+        <fs>ColorFS.glsl</fs>
+      </shader>
+    </folder>
+  </shaders>
+  <textures>
+    <folder path="resources/textures/">
+      <texture id="default" type="2d">
+        <file>white.png</file>
+        <min_filter>LINEAR</min_filter>
+        <mag_filter>LINEAR</mag_filter>
+        <wrap_s>CLAMP_TO_EDGE</wrap_s>
+        <wrap_t>CLAMP_TO_EDGE</wrap_t>
+      </texture>
+      <texture id="1" type="2d">
+        <file>Grass.tga</file>
+        <min_filter>LINEAR</min_filter>
+        <mag_filter>LINEAR</mag_filter>
+        <wrap_s>CLAMP_TO_EDGE</wrap_s>
+        <wrap_t>CLAMP_TO_EDGE</wrap_t>
+      </texture>
+      <texture id="2" type="2d">
+        <file>dirt.tga</file>
+        <min_filter>LINEAR</min_filter>
+        <mag_filter>LINEAR</mag_filter>
+        <wrap_s>GL_REPEAT</wrap_s>
+        <wrap_t>GL_REPEAT</wrap_t>
+      </texture>
+    </folder>
+  </textures>
+  <meshes>
+    <folder path="resources/models/primitives/">
+      <mesh id="1">
+        <file>cube.obj</file>
+      </mesh>
+      <mesh id="2_line">
+        <file>line.obj</file>
+      </mesh>
+      <mesh id="3_sphere">
+        <file>sphere.obj</file>
+      </mesh>
+      <mesh id="4_cube_reversed">
+        <file>cube-reversed.obj</file>
+      </mesh>
+      <mesh id="5_cilinder_rotated">
+        <file>cilinder_rotated.obj</file>
+      </mesh>
+      <mesh id="6_cone">
+        <file>cone.obj</file>
+      </mesh>
+    </folder>
+  </meshes>
+  <materials>
+    <material id="default">
+      <ambientColor>
+        <r>1.0</r>
+        <g>1.0</g>
+        <b>1.0</b>
+      </ambientColor>
+      <diffuseColor>
+        <r>0.8</r>
+        <g>0.8</g>
+        <b>0.8</b>
+      </diffuseColor>
+      <specularColor>
+        <r>0.5</r>
+        <g>0.5</g>
+        <b>0.5</b>
+      </specularColor>
+      <emissiveColor>
+        <r>1.0</r>
+        <g>1.0</g>
+        <b>1.0</b>
+      </emissiveColor>
+      <shininess>1.5</shininess>
+      <opacity>1.0</opacity>
+      <diffuseTextureId>default</diffuseTextureId>
+    </material>
+  </materials>
+</resourceManager>
