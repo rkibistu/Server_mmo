@@ -23,7 +23,15 @@ public:
 
 	static std::string PrepareMessage(NetworkTags tag, std::string content);
 
-	static void ParseMessage(std::string message, std::vector< NetworkPackage>& packages);
+	/**
+	 * It gets the message .
+	 * 
+	 * \param remainingMessage the value returned last time when the method was called
+	 * \param message the actual message that will be concatenated with first param and decoded
+	 * \param packages out value, all decoded packages
+	 * \return the message that containt an incomplete package that is need in the next call of the method
+	 */
+	static std::string ParseMessage(std::string remainingMessage, std::string message, std::vector< NetworkPackage>& packages);
 
 	static NetworkTags FromString(std::string tag) {
 		if (tag == "JoinGameRequest") {
@@ -36,12 +44,6 @@ public:
 			return NetworkTags::Invalid;
 		}
 	}
-
-private:
-	// a part of the previous recv buffer that was not compelte so was not parsed
-	// it is used in the next parsing to combine and create a new message
-	static std::string _remainingMessage;
-	static bool _shouldComplete;
 };
 
 

@@ -13,6 +13,13 @@ public:
 	int GetID() { return _id; }
 	void SetLoggedIn(bool value) { _isLoggedIn = value; }
 	void SetUsername(std::string username) { _username = username; }
+
+public:
+	// Important variable used to decode messages. 
+	// It is a part from the previous message got by this client
+	// that coudn't be encoded yet because it was not complete
+	std::string RemainingMessage = "";
+
 private:
 	int _id;
 	std::string _username;

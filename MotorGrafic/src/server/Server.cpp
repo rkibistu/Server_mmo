@@ -136,17 +136,32 @@ void Server::CheckIncomingTraffic() {
 			}
 		}
 	}
+	Sleep(3000);
 }
 
 
 void Server::Send(SOCKET clientSocket, NetworkTags tag, std::string content) {
 	std::string message = NetworkMessages::PrepareMessage(tag, content);
-	send(clientSocket, message.c_str(), message.length(), 0);
+	int totalSent = 0;
+	int messageLength = message.length();
+	while (totalSent < messageLength) {
+		int bytesSent = send(clientSocket, message.c_str() + totalSent, messageLength - totalSent, 0);
+
+		if (bytesSent == SOCKET_ERROR) {
+			int errorCode = WSAGetLastError();
+			std::cerr << "Send failed with error: " << errorCode << std::endl;
+			return;
+		}
+
+		totalSent += bytesSent;
+	}
 }
 
 void Server::HandleMessage(SOCKET clientSocket, std::string message) {
 	std::vector<NetworkPackage> packages;
-	NetworkMessages::ParseMessage(message, packages);
+
+	std::string remainingMessage = NetworkMessages::ParseMessage(_conClients[clientSocket]->RemainingMessage, message, packages);
+	_conClients[clientSocket]->RemainingMessage = remainingMessage;
 
 	for (auto package : packages) {
 		std::cout << "[" + std::string(magic_enum::enum_name(package.Tag)) + "]: " + package.Content + "\n";
@@ -169,7 +184,7 @@ void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageConte
 	JoinGameResponseData response(-1);
 
 	if (!CheckLogin(data.Username, data.Password)) {
-		//Send(clientSocket, NetworkTags::JoinGameResponse, response.Serialize());
+		Send(clientSocket, NetworkTags::JoinGameResponse, response.Serialize());
 		return;
 	}
 
@@ -178,7 +193,7 @@ void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageConte
 	client->SetUsername(data.Username);
 
 	response.Id = client->GetID();
-	//Send(clientSocket, NetworkTags::JoinGameResponse, response.Serialize());
+	Send(clientSocket, NetworkTags::JoinGameResponse, response.Serialize());
 }
 
 void Server::AddNewClient(SOCKET fd) {
