@@ -4,10 +4,18 @@
 #include <string>
 #include <nlohmanJson/json.hpp>
 
+#include "../Client.h"
+
 
 enum NetworkTags {
 	JoinGameRequest,
 	JoinGameResponse,
+
+	InfoConnectedClient,
+	InfoConnectedClients,
+
+	DisconnectClientRequest,
+	DisconnectClientSignal,
 
 	Invalid
 };
@@ -25,7 +33,7 @@ public:
 
 	/**
 	 * It gets the message .
-	 * 
+	 *
 	 * \param remainingMessage the value returned last time when the method was called
 	 * \param message the actual message that will be concatenated with first param and decoded
 	 * \param packages out value, all decoded packages
@@ -39,6 +47,15 @@ public:
 		}
 		else if (tag == "JoinGameResponse") {
 			return NetworkTags::JoinGameResponse;
+		}
+		else if (tag == "InfoConnectedClient") {
+			return NetworkTags::InfoConnectedClient;
+		}
+		else if (tag == "InfoConnectedClients") {
+			return NetworkTags::InfoConnectedClients;
+		}
+		else if (tag == "DisconnectClientSignal") {
+			return NetworkTags::DisconnectClientSignal;
 		}
 		else {
 			return NetworkTags::Invalid;
@@ -92,6 +109,85 @@ struct JoinGameResponseData {
 	}
 
 	static JoinGameResponseData Deserialize(const std::string& data) {
+		nlohmann::json j = nlohmann::json::parse(data);
+		return { (int)j["Id"] };
+	}
+};
+
+struct InfoConnectedClientData {
+	int Id;
+	std::string Username;
+
+	InfoConnectedClientData(int id, std::string username) : Id(id), Username(username) {}
+
+	InfoConnectedClientData(const std::string& serializedData) {
+		nlohmann::json j = nlohmann::json::parse(serializedData);
+		Id = j["Id"];
+		Username = j["Username"];
+	}
+
+	std::string Serialize() const {
+		nlohmann::json j;
+		j["Id"] = Id;
+		j["Username"] = Username;
+		return j.dump();
+	}
+
+	static InfoConnectedClientData Deserialize(const std::string& data) {
+		nlohmann::json j = nlohmann::json::parse(data);
+		return { (int)j["Id"], j["Username"] };
+	}
+};
+
+struct InfoConnectedClientsData {
+	std::vector<InfoConnectedClientData> Clients;
+
+	InfoConnectedClientsData() = default;
+
+	InfoConnectedClientsData(std::vector<InfoConnectedClientData> clients)
+		: Clients(std::move(clients)) {
+	}
+
+	InfoConnectedClientsData(const std::string& serializedData) {
+		nlohmann::json j = nlohmann::json::parse(serializedData);
+		for (const auto& item : j["Clients"]) {
+			Clients.emplace_back(item.dump());
+		}
+	}
+
+	// Serialize the entire list to JSON string
+	std::string Serialize() const {
+		nlohmann::json j;
+		j["Clients"] = nlohmann::json::array();
+		for (const auto& client : Clients) {
+			j["Clients"].push_back(nlohmann::json::parse(client.Serialize()));
+		}
+		return j.dump();
+	}
+
+	// Static function to deserialize from a JSON string
+	static InfoConnectedClientsData Deserialize(const std::string& data) {
+		return InfoConnectedClientsData(data);
+	}
+};
+
+struct DisconnectClientData {
+	int Id;
+
+	DisconnectClientData(int id) : Id(id) {}
+
+	DisconnectClientData(const std::string& serializedData) {
+		nlohmann::json j = nlohmann::json::parse(serializedData);
+		Id = j["Id"];
+	}
+
+	std::string Serialize() const {
+		nlohmann::json j;
+		j["Id"] = Id;
+		return j.dump();
+	}
+
+	static DisconnectClientData Deserialize(const std::string& data) {
 		nlohmann::json j = nlohmann::json::parse(data);
 		return { (int)j["Id"] };
 	}

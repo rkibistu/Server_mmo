@@ -12,6 +12,8 @@ public:
 
 	int GetID() { return _id; }
 	void SetLoggedIn(bool value) { _isLoggedIn = value; }
+
+	std::string GetUsername() { return _username; }
 	void SetUsername(std::string username) { _username = username; }
 
 public:

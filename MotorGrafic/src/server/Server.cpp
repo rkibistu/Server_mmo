@@ -121,7 +121,7 @@ void Server::CheckIncomingTraffic() {
 					int bytes_received = recv(_clients[i].fd, buffer, sizeof(buffer) - 1, 0);
 					if (bytes_received <= 0) {
 						std::cout << "Client disconnected: " << _clients[i].fd << "\n";
-						RemoveClient(_clients[i].fd);
+						DisconnectClient(_clients[i].fd);
 						closesocket(_clients[i].fd);
 						_clients.erase(_clients.begin() + i);
 					}
@@ -136,7 +136,6 @@ void Server::CheckIncomingTraffic() {
 			}
 		}
 	}
-	Sleep(3000);
 }
 
 
@@ -157,6 +156,14 @@ void Server::Send(SOCKET clientSocket, NetworkTags tag, std::string content) {
 	}
 }
 
+void Server::SendToAllExcept(SOCKET clientSocket, NetworkTags tag, std::string content) {
+	for (auto cliendWsapollfd : _clients) {
+		if (cliendWsapollfd.fd != clientSocket) {
+			Send(cliendWsapollfd.fd, tag, content);
+		}
+	}
+}
+
 void Server::HandleMessage(SOCKET clientSocket, std::string message) {
 	std::vector<NetworkPackage> packages;
 
@@ -169,6 +176,8 @@ void Server::HandleMessage(SOCKET clientSocket, std::string message) {
 		case JoinGameRequest:
 			HandleJoinGameRequest(clientSocket, package.Content);
 			break;
+		case DisconnectClientRequest:
+			HandleDisconnectClientRequest(clientSocket, package.Content);
 		default:
 			break;
 		}
@@ -192,9 +201,40 @@ void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageConte
 	client->SetLoggedIn(true);
 	client->SetUsername(data.Username);
 
+	//trimite raspuns la cel care a initiat logarea
 	response.Id = client->GetID();
 	Send(clientSocket, NetworkTags::JoinGameResponse, response.Serialize());
+
+	//trimite info clientului nou despre toti clientii conectati
+	std::vector<InfoConnectedClientData> temp;
+	for (auto client : _conClients) {
+		if (client.first != clientSocket)
+			temp.push_back({ client.second->GetID(), client.second->GetUsername() });
+	}
+	InfoConnectedClientsData allConClients(temp);
+	Send(clientSocket, NetworkTags::InfoConnectedClients, allConClients.Serialize());
+
+	// trimite informatiile despre noul client tuturor celorlalti
+	InfoConnectedClientData info{ client->GetID(), client->GetUsername() };
+	SendToAllExcept(clientSocket, InfoConnectedClient, info.Serialize());
 }
+
+void Server::HandleDisconnectClientRequest(SOCKET clientSocket, std::string messageContent) {
+	DisconnectClient(clientSocket);
+}
+
+void Server::DisconnectClient(SOCKET clientSocket) {
+	if (_conClients.find(clientSocket) == _conClients.end()) {
+		std::cout << "[ERROR]: Tried to disconnect a client that didn;t exist in the dictionary. Check it!\n";
+		return;
+	}
+
+	DisconnectClientData data(_conClients[clientSocket]->GetID());
+	Send(clientSocket, NetworkTags::DisconnectClientSignal, data.Serialize());
+
+	RemoveClient(clientSocket);
+}
+
 
 void Server::AddNewClient(SOCKET fd) {
 	if (_conClients.find(fd) != _conClients.end()) {

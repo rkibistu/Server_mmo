@@ -52,7 +52,7 @@ std::string NetworkMessages::ParseMessage(std::string remainingMessage, std::str
 		length = std::stoi(lengthStr);
 
 		// Check if the full message is available
-		if (message.length() < length + lengthStr.length()) {
+		if (message.length() < length + lengthStr.length() -1) {
 			return message;  // Wait for more data
 		}
 

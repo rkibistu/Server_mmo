@@ -29,6 +29,7 @@ public:
 
 private:
 	void Send(SOCKET clientSocket, NetworkTags tag, std::string content);
+	void SendToAllExcept(SOCKET clientSocket, NetworkTags tag, std::string content);
 	void HandleMessage(SOCKET clientSocket, std::string message);
 
 	/**
@@ -37,7 +38,9 @@ private:
 	 * send to the new client all the existing clients
 	 */
 	void HandleJoinGameRequest(SOCKET clientSocket, std::string messageContent);
+	void HandleDisconnectClientRequest(SOCKET clientSocket, std::string messageContent);
 
+	void DisconnectClient(SOCKET clientSocket);
 	bool CheckLogin(std::string usenrame, std::string pass) { return true; }
 
 	void AddNewClient(SOCKET fd);
