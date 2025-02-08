@@ -48,23 +48,23 @@ std::string NetworkMessages::ParseMessage(std::string remainingMessage, std::str
 			return message; // Wait for more data
 		}
 
-		std::string lengthStr = message.substr(startDelimiter + 1, first_colon);
+		std::string lengthStr = message.substr(startDelimiter + 1, first_colon - 1);
 		length = std::stoi(lengthStr);
 
 		// Check if the full message is available
-		if (message.length() < length + lengthStr.length() -1) {
+		if (message.length() < length + lengthStr.length() - 1) {
 			return message;  // Wait for more data
 		}
 
 		std::string type = message.substr(first_colon + 1, second_colon - first_colon - 1);
 		tag = FromString(type);
 
-		content = message.substr(second_colon + 1, length - second_colon);
+		content = message.substr(second_colon + 1, length + lengthStr.length() - (second_colon + 1) - 1);
 
 		packages.push_back({ length,tag,content });
 
 		// Remove processed message from buffer
-		message = message.substr(length + lengthStr.length() - 1);
+		message = message.substr(length + lengthStr.length());
 		if (message.empty())
 			return message;
 	}
