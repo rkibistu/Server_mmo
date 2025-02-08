@@ -1,5 +1,12 @@
 #include "Client.h"
 
-Client::Client(int id) {
-	_id = id;
+Client::Client(SOCKET fd) {
+	_fd = fd;
+}
+
+Client::~Client() {
+	if (_player) {
+		delete _player;
+		_player = nullptr;
+	}
 }

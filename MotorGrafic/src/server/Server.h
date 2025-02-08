@@ -45,6 +45,7 @@ private:
 
 	void DisconnectClient(SOCKET clientSocket);
 	bool CheckLogin(std::string usenrame, std::string pass) { return true; }
+	Player* HandleLogin(std::string username, std::string pass);
 
 	void AddNewClient(SOCKET fd);
 	void RemoveClient(SOCKET fd);

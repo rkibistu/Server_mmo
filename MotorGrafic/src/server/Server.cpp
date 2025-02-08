@@ -95,8 +95,6 @@ bool Server::Init() {
 	// Insert a test user
 	//_dbManager->insertUser("testUser", "testPass", 1.1, 2.2, 3.3);
 
-	// Select and display all users
-	_dbManager->selectUser("test");
 
 	std::cout << "Server listening on port " << DEFAULT_PORT << "...\n";
 }
@@ -252,14 +250,14 @@ void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageConte
 	// we use -1 to mark a failed login
 	JoinGameResponseData response(-1);
 
-	if (!CheckLogin(data.Username, data.Password)) {
+	Player* player = HandleLogin(data.Username, data.Password);
+	if (player == nullptr) {
 		Send(clientSocket, NetworkTags::JoinGameResponse, response.Serialize());
 		return;
 	}
 
 	Client* client = GetClient(clientSocket);
-	client->SetLoggedIn(true);
-	client->SetUsername(data.Username);
+	client->SetPlayer(player);
 
 
 	// trimite informatiile despre noul client tuturor celorlalti
@@ -293,6 +291,33 @@ void Server::DisconnectClient(SOCKET clientSocket) {
 	DisconnectClientData data(_conClients[clientSocket]->GetID());
 	SendToAll(NetworkTags::DisconnectClientSignal, data.Serialize());
 	RemoveClient(clientSocket);
+}
+
+Player* Server::HandleLogin(std::string username, std::string pass) {
+
+	// Select and display all users
+	Player* player;
+	User user = _dbManager->selectUser(username);
+	if (user.exist == true) {
+		// already connected username OR wrong password -> no login
+		if (_conClients.find(user.Id) != _conClients.end() || user.Password != pass)
+			return nullptr;
+	}
+	else {
+		// we should create the user
+		user.Username = username;
+		user.Password = pass;
+		user.PosX = 0;
+		user.PosY = 0;
+		user.PosZ = 0;
+
+		bool okay = _dbManager->insertUser(user);
+		if (okay == false)
+			return nullptr;
+	}
+
+	player = new Player(user.Id, user.Username, rml::Vector3(user.PosX, user.PosY, user.PosZ));
+	return player;
 }
 
 void Server::AddNewClient(SOCKET fd) {
