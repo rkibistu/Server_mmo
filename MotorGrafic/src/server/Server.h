@@ -30,8 +30,9 @@ public:
 private:
 	void Send(SOCKET clientSocket, NetworkTags tag, std::string content);
 	void SendToAllExcept(SOCKET clientSocket, NetworkTags tag, std::string content);
+	void SendToAll(NetworkTags tag, std::string content);
 	void HandleMessage(SOCKET clientSocket, std::string message);
-
+	void HandleErrors(SOCKET clientSocket, int error);
 	/**
 	 * add to list
 	 * send to all client the new client
@@ -58,6 +59,12 @@ private:
 	// when reading incoming traffic
 	std::vector<WSAPOLLFD> _clients;
 	std::unordered_map<SOCKET, Client*> _conClients;
+
+	// HandleError method adds here clients that should be disconnected and removed
+	// The method can't remove them becuase the method can be called inside a loop
+	// and removing while looping triggers errors
+	// So the method marks them and the program will remove them later in the loop
+	std::vector<SOCKET> _clientToDisconnect;
 
 	static int _clientIdsTemp;
 };

@@ -2,6 +2,7 @@
 
 #include <list>
 #include <string>
+#include <iostream>
 #include <nlohmanJson/json.hpp>
 
 #include "../Client.h"
@@ -53,6 +54,9 @@ public:
 		}
 		else if (tag == "InfoConnectedClients") {
 			return NetworkTags::InfoConnectedClients;
+		}
+		else if (tag == "DisconnectClientRequest") {
+			return NetworkTags::DisconnectClientRequest;
 		}
 		else if (tag == "DisconnectClientSignal") {
 			return NetworkTags::DisconnectClientSignal;
@@ -134,6 +138,7 @@ struct InfoConnectedClientData {
 	}
 
 	static InfoConnectedClientData Deserialize(const std::string& data) {
+
 		nlohmann::json j = nlohmann::json::parse(data);
 		return { (int)j["Id"], j["Username"] };
 	}
@@ -160,8 +165,9 @@ struct InfoConnectedClientsData {
 		nlohmann::json j;
 		j["Clients"] = nlohmann::json::array();
 		for (const auto& client : Clients) {
-			j["Clients"].push_back(nlohmann::json::parse(client.Serialize()));
+			j["Clients"].push_back({ {"Id", client.Id}, {"Username", client.Username} });
 		}
+		std::cout << j.dump() << std::endl;
 		return j.dump();
 	}
 

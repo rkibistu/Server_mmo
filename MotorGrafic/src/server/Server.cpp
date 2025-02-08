@@ -114,6 +114,8 @@ void Server::CheckIncomingTraffic() {
 					std::cout << "New client connected: " << new_client << "\n";
 					_clients.push_back({ new_client, POLLRDNORM, 0 });
 					AddNewClient(new_client);
+					std::cout << "Sunt " << _conClients.size() << " conectati\n";
+
 				}
 				else {
 					// Handle client data
@@ -136,6 +138,27 @@ void Server::CheckIncomingTraffic() {
 			}
 		}
 	}
+
+	if (_clientToDisconnect.size() > 0) {
+		for (auto client : _clientToDisconnect) {
+			if (_conClients.find(client) != _conClients.begin()) {
+				if (_conClients[client]) {
+
+					DisconnectClientData data(_conClients[client]->GetID());
+					RemoveClient(client);
+					SendToAll(NetworkTags::DisconnectClientSignal, data.Serialize());
+				}
+				else {
+					RemoveClient(client);
+				}
+			}
+			else {
+				RemoveClient(client);
+			}
+		}
+		_clientToDisconnect.clear();
+		std::cout << "Dupa deconect mai Sunt " << _conClients.size() << " conectati\n";
+	}
 }
 
 
@@ -149,17 +172,28 @@ void Server::Send(SOCKET clientSocket, NetworkTags tag, std::string content) {
 		if (bytesSent == SOCKET_ERROR) {
 			int errorCode = WSAGetLastError();
 			std::cerr << "Send failed with error: " << errorCode << std::endl;
+			HandleErrors(clientSocket, errorCode);
 			return;
 		}
 
 		totalSent += bytesSent;
 	}
+
+	std::cout << "SENT: " << content << std::endl;
 }
 
 void Server::SendToAllExcept(SOCKET clientSocket, NetworkTags tag, std::string content) {
-	for (auto cliendWsapollfd : _clients) {
-		if (cliendWsapollfd.fd != clientSocket) {
-			Send(cliendWsapollfd.fd, tag, content);
+	for (auto client : _conClients) {
+		if (client.first != clientSocket && client.first != _listenSocket) {
+			Send(client.first, tag, content);
+		}
+	}
+}
+
+void Server::SendToAll(NetworkTags tag, std::string content) {
+	for (auto client : _conClients) {
+		if (client.first != _listenSocket) {
+			Send(client.first, tag, content);
 		}
 	}
 }
@@ -185,6 +219,25 @@ void Server::HandleMessage(SOCKET clientSocket, std::string message) {
 
 }
 
+void Server::HandleErrors(SOCKET clientSocket, int error) {
+	switch (error) {
+	case WSAECONNRESET:
+	{
+		//Connection reset by peer. An existing connection was forcibly closed by the remote host.
+		// This normally results if the peer application on the remote host is suddenly stopped, 
+		// the host is rebooted, the host or remote network interface is disabled, or the remote host
+		// uses a hard close
+		std::cout << "Error " << error << " handles. Disconetcted client: " << clientSocket << "\n";
+		if (_conClients.find(clientSocket) != _conClients.end()) {
+			_clientToDisconnect.push_back(clientSocket);
+		}
+		break;
+	}
+	default:
+		break;
+	}
+}
+
 void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageContent) {
 
 	JoinGameRequestData data(messageContent);
@@ -201,6 +254,11 @@ void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageConte
 	client->SetLoggedIn(true);
 	client->SetUsername(data.Username);
 
+
+	// trimite informatiile despre noul client tuturor celorlalti
+	InfoConnectedClientData info{ client->GetID(), client->GetUsername() };
+	SendToAllExcept(clientSocket, InfoConnectedClient, info.Serialize());
+
 	//trimite raspuns la cel care a initiat logarea
 	response.Id = client->GetID();
 	Send(clientSocket, NetworkTags::JoinGameResponse, response.Serialize());
@@ -213,10 +271,6 @@ void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageConte
 	}
 	InfoConnectedClientsData allConClients(temp);
 	Send(clientSocket, NetworkTags::InfoConnectedClients, allConClients.Serialize());
-
-	// trimite informatiile despre noul client tuturor celorlalti
-	InfoConnectedClientData info{ client->GetID(), client->GetUsername() };
-	SendToAllExcept(clientSocket, InfoConnectedClient, info.Serialize());
 }
 
 void Server::HandleDisconnectClientRequest(SOCKET clientSocket, std::string messageContent) {
@@ -230,11 +284,9 @@ void Server::DisconnectClient(SOCKET clientSocket) {
 	}
 
 	DisconnectClientData data(_conClients[clientSocket]->GetID());
-	Send(clientSocket, NetworkTags::DisconnectClientSignal, data.Serialize());
-
+	SendToAll(NetworkTags::DisconnectClientSignal, data.Serialize());
 	RemoveClient(clientSocket);
 }
-
 
 void Server::AddNewClient(SOCKET fd) {
 	if (_conClients.find(fd) != _conClients.end()) {
@@ -248,6 +300,14 @@ void Server::RemoveClient(SOCKET fd) {
 	auto it = _conClients.find(fd);
 	if (it != _conClients.end()) {
 		delete it->second;  // Delete the dynamically allocated Client
+		it->second = nullptr;
 	}
 	_conClients.erase(fd);
+
+	for (auto it = _clients.begin(); it != _clients.end(); ++it) {
+		if (it->fd == fd) {
+			_clients.erase(it);
+			break; // Erasing invalidates the iterator, so exit loop
+		}
+	}
 }

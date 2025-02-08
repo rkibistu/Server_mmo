@@ -21,7 +21,6 @@ public:
 	// It is a part from the previous message got by this client
 	// that coudn't be encoded yet because it was not complete
 	std::string RemainingMessage = "";
-
 private:
 	int _id;
 	std::string _username;
