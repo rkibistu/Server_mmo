@@ -116,27 +116,26 @@ void Server::CheckIncomingTraffic() {
 					// Accept new client
 					SOCKET new_client = accept(_listenSocket, NULL, NULL);
 
-					std::cout << "New client connected: " << new_client << "\n";
+					std::cout << "New client connected, SOCKET: " << new_client << "\n";
 					_clients.push_back({ new_client, POLLRDNORM, 0 });
 					AddNewClient(new_client);
 					std::cout << "Sunt " << _conClients.size() << " conectati\n";
-
 				}
 				else {
 					// Handle client data
 					char buffer[DEFAULT_BUFLEN];
 					int bytes_received = recv(_clients[i].fd, buffer, sizeof(buffer) - 1, 0);
 					if (bytes_received <= 0) {
-						std::cout << "Client disconnected: " << _clients[i].fd << "\n";
+						std::cout << "Client disconnected, socket: " << _clients[i].fd << "\n";
 						DisconnectClient(_clients[i].fd);
 						closesocket(_clients[i].fd);
 						_clients.erase(_clients.begin() + i);
 					}
 					else {
 						buffer[bytes_received] = '\0';
-						std::cout << "%%%%\n";
-						std::cout << buffer << std::endl;
-						std::cout << "%%%%\n";
+						//std::cout << "%%%%\n";
+						//std::cout << buffer << std::endl;
+						//std::cout << "%%%%\n";
 						HandleMessage(_clients[i].fd, buffer);
 					}
 				}
@@ -145,24 +144,24 @@ void Server::CheckIncomingTraffic() {
 	}
 
 	if (_clientToDisconnect.size() > 0) {
-		for (auto client : _clientToDisconnect) {
-			if (_conClients.find(client) != _conClients.begin()) {
-				if (_conClients[client]) {
-
-					DisconnectClientData data(_conClients[client]->GetID());
-					RemoveClient(client);
+		for (int i = 0; i < _clientToDisconnect.size(); i++) {
+			if (_conClients.find(_clientToDisconnect[i]) != _conClients.end()) {
+				if (_conClients[_clientToDisconnect[i]]) {
+					std::cout << "Disconnect client socket: " << _clientToDisconnect[i] << "  ID: " << _conClients[_clientToDisconnect[i]]->GetID() << "\n";
+					DisconnectClientData data(_conClients[_clientToDisconnect[i]]->GetID());
+					RemoveClient(_clientToDisconnect[i]);
 					SendToAll(NetworkTags::DisconnectClientSignal, data.Serialize());
 				}
 				else {
-					RemoveClient(client);
+					RemoveClient(_clientToDisconnect[i]);
 				}
 			}
 			else {
-				RemoveClient(client);
+				RemoveClient(_clientToDisconnect[i]);
 			}
 		}
 		_clientToDisconnect.clear();
-		std::cout << "Dupa deconect mai Sunt " << _conClients.size() << " conectati\n";
+		std::cout << "Au ramas " << _conClients.size() << " conectati\n";
 	}
 }
 
@@ -184,7 +183,7 @@ void Server::Send(SOCKET clientSocket, NetworkTags tag, std::string content) {
 		totalSent += bytesSent;
 	}
 
-	std::cout << "SENT: " << content << std::endl;
+	std::cout << "SENT: [" << magic_enum::enum_name(tag) << "]: " << content << std::endl;
 }
 
 void Server::SendToAllExcept(SOCKET clientSocket, NetworkTags tag, std::string content) {
@@ -210,7 +209,7 @@ void Server::HandleMessage(SOCKET clientSocket, std::string message) {
 	_conClients[clientSocket]->RemainingMessage = remainingMessage;
 
 	for (auto package : packages) {
-		std::cout << "[" + std::string(magic_enum::enum_name(package.Tag)) + "]: " + package.Content + "\n";
+		std::cout << "HANDLE: [" + std::string(magic_enum::enum_name(package.Tag)) + "]: " + package.Content + "\n";
 		switch (package.Tag) {
 		case JoinGameRequest:
 			HandleJoinGameRequest(clientSocket, package.Content);
@@ -234,7 +233,15 @@ void Server::HandleErrors(SOCKET clientSocket, int error) {
 		// uses a hard close
 		std::cout << "Error " << error << " handles. Disconetcted client: " << clientSocket << "\n";
 		if (_conClients.find(clientSocket) != _conClients.end()) {
-			_clientToDisconnect.push_back(clientSocket);
+			bool addToDisconnectList = true;
+			for (int i = 0; i < _clientToDisconnect.size(); i++) {
+				if (_clientToDisconnect[i] == clientSocket) {
+					addToDisconnectList = false;
+					break;
+				}
+			}
+			if (addToDisconnectList)
+				_clientToDisconnect.push_back(clientSocket);
 		}
 		break;
 	}
@@ -258,6 +265,8 @@ void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageConte
 
 	Client* client = GetClient(clientSocket);
 	client->SetPlayer(player);
+	AddNewClientToIdDict(client->GetID(), client);
+	std::cout << "Created player for client with socket" << clientSocket << "and ID: " << client->GetID() << "\n";
 
 
 	// trimite informatiile despre noul client tuturor celorlalti
@@ -300,7 +309,7 @@ Player* Server::HandleLogin(std::string username, std::string pass) {
 	User user = _dbManager->selectUser(username);
 	if (user.exist == true) {
 		// already connected username OR wrong password -> no login
-		if (_conClients.find(user.Id) != _conClients.end() || user.Password != pass)
+		if (_conIdClients.find(user.Id) != _conIdClients.end() || user.Password != pass)
 			return nullptr;
 	}
 	else {
@@ -314,6 +323,7 @@ Player* Server::HandleLogin(std::string username, std::string pass) {
 		bool okay = _dbManager->insertUser(user);
 		if (okay == false)
 			return nullptr;
+		user = _dbManager->selectUser(username);
 	}
 
 	player = new Player(user.Id, user.Username, rml::Vector3(user.PosX, user.PosY, user.PosZ));
@@ -329,8 +339,10 @@ void Server::AddNewClient(SOCKET fd) {
 }
 
 void Server::RemoveClient(SOCKET fd) {
+
 	auto it = _conClients.find(fd);
 	if (it != _conClients.end()) {
+		RemoveClientFromIdDIct(it->second->GetID());
 		delete it->second;  // Delete the dynamically allocated Client
 		it->second = nullptr;
 	}
@@ -343,3 +355,21 @@ void Server::RemoveClient(SOCKET fd) {
 		}
 	}
 }
+
+void Server::AddNewClientToIdDict(int id, Client* client) {
+	if (_conIdClients.find(id) == _conIdClients.end()) {
+		_conIdClients[id] = client;
+	}
+	else {
+		throw "This should not happen!";
+	}
+}
+
+void Server::RemoveClientFromIdDIct(int id) {
+
+	auto client = _conIdClients.find(id);
+	if (client != _conIdClients.end()) {
+		_conIdClients.erase(client);
+	}
+}
+
