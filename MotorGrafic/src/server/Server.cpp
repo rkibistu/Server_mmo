@@ -8,7 +8,7 @@
 #include <magic_enum/magic_enum.hpp>
 
 #include "Client.h"
-
+#include "DatabaseManager.h"
 
 
 #define DEFAULT_PORT "12345"
@@ -90,6 +90,13 @@ bool Server::Init() {
 	}
 
 	_clients.push_back({ _listenSocket, POLLRDNORM, 0 });
+
+	_dbManager = new DatabaseManager();
+	// Insert a test user
+	//_dbManager->insertUser("testUser", "testPass", 1.1, 2.2, 3.3);
+
+	// Select and display all users
+	_dbManager->selectUser("test");
 
 	std::cout << "Server listening on port " << DEFAULT_PORT << "...\n";
 }

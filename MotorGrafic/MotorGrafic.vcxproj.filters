@@ -129,6 +129,15 @@
     <ClCompile Include="src\server\Server.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\server\Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\server\shared\NetworkMessages.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\server\Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="deps\include\glad\glad.h">
@@ -272,6 +281,51 @@
     <ClInclude Include="src\server\Server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="deps\include\magic_enum\magic_enum.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\include\magic_enum\magic_enum_all.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\include\magic_enum\magic_enum_containers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\include\magic_enum\magic_enum_flags.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\include\magic_enum\magic_enum_format.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\include\magic_enum\magic_enum_fuse.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\include\magic_enum\magic_enum_iostream.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\include\magic_enum\magic_enum_switch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\include\magic_enum\magic_enum_utility.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\include\nlohmanJson\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\include\nlohmanJson\json_fwd.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server\Client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server\shared\NetworkMessages.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server\DatabaseManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server\Player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="deps\libs\GLFW\glfw3.lib" />
@@ -300,6 +354,14 @@
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="deps\libs\assimp-vc143-mtd.dll" />
+    <CopyFileToFolders Include="deps\libs\pqxx.dll" />
+    <CopyFileToFolders Include="deps\libs\libpq.dll" />
+    <CopyFileToFolders Include="deps\libs\libssl-3-x64.dll" />
+    <CopyFileToFolders Include="deps\libs\libcrypto-3-x64.dll" />
+    <CopyFileToFolders Include="deps\libs\libcrypto-3-x64.pdb" />
+    <CopyFileToFolders Include="deps\libs\libpq.pdb" />
+    <CopyFileToFolders Include="deps\libs\libssl-3-x64.pdb" />
+    <CopyFileToFolders Include="deps\libs\pqxx.pdb" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\test.cu" />

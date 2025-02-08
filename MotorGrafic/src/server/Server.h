@@ -11,7 +11,9 @@
 
 #include "server/shared/NetworkMessages.h"
 
+
 class Client;
+class DatabaseManager;
 
 class Server {
 public:
@@ -66,5 +68,6 @@ private:
 	// So the method marks them and the program will remove them later in the loop
 	std::vector<SOCKET> _clientToDisconnect;
 
+	DatabaseManager* _dbManager;
 	static int _clientIdsTemp;
 };

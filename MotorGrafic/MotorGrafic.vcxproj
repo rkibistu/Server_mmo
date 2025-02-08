@@ -117,7 +117,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>glfw3.lib;$(SolutionDir)deps\libs;opengl32.lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc143-mtd.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libpq.lib;pqxx.lib;assimp-vc143-mtd.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
@@ -171,6 +171,7 @@
     <ClCompile Include="src\physics\PhysicsController.cpp" />
     <ClCompile Include="src\physics\SphereObject.cpp" />
     <ClCompile Include="src\server\Client.cpp" />
+    <ClCompile Include="src\server\Player.cpp" />
     <ClCompile Include="src\server\Server.cpp" />
     <ClCompile Include="src\server\shared\NetworkMessages.cpp" />
     <ClCompile Include="src\utils\Math.cpp" />
@@ -228,6 +229,8 @@
     <ClInclude Include="src\core\World.h" />
     <ClInclude Include="src\physics\PhysicsGpu.h" />
     <ClInclude Include="src\server\Client.h" />
+    <ClInclude Include="src\server\DatabaseManager.h" />
+    <ClInclude Include="src\server\Player.h" />
     <ClInclude Include="src\server\Server.h" />
     <ClInclude Include="src\server\shared\NetworkMessages.h" />
     <ClInclude Include="src\test.h" />
@@ -249,6 +252,31 @@
   <ItemGroup>
     <CopyFileToFolders Include="deps\libs\assimp-vc143-mtd.dll">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="deps\libs\pqxx.dll">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="deps\libs\libpq.dll">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="deps\libs\libssl-3-x64.dll">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="deps\libs\libcrypto-3-x64.dll">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="deps\libs\libcrypto-3-x64.pdb">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="deps\libs\libpq.pdb">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="deps\libs\libssl-3-x64.pdb">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="deps\libs\pqxx.pdb">
       <FileType>Document</FileType>
     </CopyFileToFolders>
     <None Include="resources\shaders\BasicFS.frag" />
