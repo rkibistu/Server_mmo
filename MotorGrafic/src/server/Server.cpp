@@ -211,7 +211,7 @@ void Server::HandleMessage(SOCKET clientSocket, std::string message) {
 	_conClients[clientSocket]->RemainingMessage = remainingMessage;
 
 	for (auto package : packages) {
-		std::cout << "HANDLE: [" + std::string(magic_enum::enum_name(package.Tag)) + "]: " + package.Content + "\n";
+		//std::cout << "HANDLE: [" + std::string(magic_enum::enum_name(package.Tag)) + "]: " + package.Content + "\n";
 		switch (package.Tag) {
 		case JoinGameRequest:
 			HandleJoinGameRequest(clientSocket, package.Content);
@@ -231,6 +231,7 @@ void Server::HandleMessage(SOCKET clientSocket, std::string message) {
 
 void Server::HandleErrors(SOCKET clientSocket, int error) {
 	switch (error) {
+	case WSAECONNABORTED:
 	case WSAECONNRESET:
 	{
 		//Connection reset by peer. An existing connection was forcibly closed by the remote host.

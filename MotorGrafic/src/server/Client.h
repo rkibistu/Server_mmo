@@ -12,12 +12,12 @@ public:
 	Client(SOCKET fd);
 	~Client();
 
-	int GetID() { return _player->GetId(); }
-	std::string GetUsername() { return _player->GetUsername(); }
+	int GetID() { return (_player == nullptr) ? -1 : _player->GetId(); }
+	std::string GetUsername() { return (_player == nullptr) ? "-1" : _player->GetUsername(); }
 
 	Player* GetPlayer() { return _player; }
 	void SetPlayer(Player* player) { _player = player; }
-	
+
 public:
 	// Important variable used to decode messages. 
 	// It is a part from the previous message got by this client
