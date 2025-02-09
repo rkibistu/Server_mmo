@@ -25,7 +25,7 @@ void CpuWorker::ResolveMovement() {
 			if (CheckOverlap(bv1.Min, bv1.Max, bv2.Min, bv2.Max)) {
 				//one collision detected 
 				//mark to rollback
-				_collisionMarker[index] = 1;
+				_collisionMarker[player1->GetId()] = 1;
 				break;
 			}
 		}
@@ -35,17 +35,32 @@ void CpuWorker::ResolveMovement() {
 	//check collisions with the environment
 
 	//rollback movement for colliding players
-	for (int i = 0; i < index; i++) {
-		if (_collisionMarker[i] == 1) {
-			MoveData data = server._movedClients[i];
-			Player* player = server._conIdClients[data.Id]->GetPlayer();
+	//for (int i = 0; i < index; i++) {
+	//	if (_collisionMarker[i] == 1) {
+	//		MoveData data = server._movedClients[i];
+	//		Player* player = server._conIdClients[data.Id]->GetPlayer();
 
-			player->RollbackMovement();
-		}
-	}
+	//		player->RollbackMovement();
+	//	}
+	//}
+
+	//for (auto client : server._conIdClients) {
+	//	client.second->GetPlayer()->ResetAccumulatedMovement();
+	//}
 
 	for (auto client : server._conIdClients) {
-		client.second->GetPlayer()->ResetAccumulatedMovement();
+
+		Player* player = client.second->GetPlayer();
+		if (player != nullptr) {
+			if (_collisionMarker[player->GetId()]) {
+				player->RollbackMovement();
+			}
+			else {
+				client.second->GetPlayer()->ResetAccumulatedMovement();
+			}
+		}
+
+
 	}
 }
 

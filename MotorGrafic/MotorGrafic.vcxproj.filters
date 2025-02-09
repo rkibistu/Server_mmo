@@ -147,6 +147,9 @@
     <ClCompile Include="src\server\workers\BaseWorker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\server\workers\GpuWorker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="deps\include\glad\glad.h">
@@ -344,6 +347,12 @@
     <ClInclude Include="src\server\workers\CpuWorker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\server\workers\GpuWorker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server\workers\GpuCollisions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="deps\libs\GLFW\glfw3.lib" />
@@ -384,5 +393,6 @@
   <ItemGroup>
     <CudaCompile Include="src\test.cu" />
     <CudaCompile Include="src\physics\PhysicsGpu.cu" />
+    <CudaCompile Include="src\server\workers\GpuCollisions.cu" />
   </ItemGroup>
 </Project>

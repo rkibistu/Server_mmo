@@ -98,14 +98,14 @@ bool Server::Init() {
 	_clients.push_back({ _listenSocket, POLLRDNORM, 0 });
 
 	_dbManager = new DatabaseManager();
-	_scheduler = new Scheduler(Scheduler::WorkerType::CPU);
+	_scheduler = new Scheduler(Scheduler::WorkerType::GPU);
 	// Insert a test user
 	//_dbManager->insertUser("testUser", "testPass", 1.1, 2.2, 3.3);
 
 
 	std::cout << "Server listening on port " << DEFAULT_PORT << "...\n";
 }
-
+ 
 void Server::Close() {
 
 	closesocket(_listenSocket);

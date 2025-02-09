@@ -3,6 +3,7 @@
 
 #include "server/workers/BaseWorker.h"
 #include "server/workers/CpuWorker.h"
+#include "server/workers/GpuWorker.h"
 
 
 Scheduler::Scheduler(WorkerType workerType) {
@@ -10,8 +11,9 @@ Scheduler::Scheduler(WorkerType workerType) {
 	if (workerType == WorkerType::CPU) {
 		_worker = new CpuWorker();
 	}
-	else {
+	else if(workerType == WorkerType::GPU){
 
+		_worker = new GpuWorker();
 	}
 }
 

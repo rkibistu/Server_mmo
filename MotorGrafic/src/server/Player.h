@@ -34,6 +34,7 @@ public:
 		_position -= _accumulatedMovement;
 		ResetAccumulatedMovement();
 	}
+	bool HasMoved() { return (_accumulatedMovement.x != 0 || _accumulatedMovement.y != 0 || _accumulatedMovement.z != 0); }
 
 private:
 	void Spawn();
@@ -53,4 +54,5 @@ private:
 	BoundingVolume _boundingVolume;
 
 	rml::Vector3 _accumulatedMovement = rml::Vector3(0, 0, 0);
+
 };
