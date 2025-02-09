@@ -98,7 +98,7 @@ bool Server::Init() {
 	_clients.push_back({ _listenSocket, POLLRDNORM, 0 });
 
 	_dbManager = new DatabaseManager();
-	_scheduler = new Scheduler();
+	_scheduler = new Scheduler(Scheduler::WorkerType::CPU);
 	// Insert a test user
 	//_dbManager->insertUser("testUser", "testPass", 1.1, 2.2, 3.3);
 
@@ -222,23 +222,7 @@ void Server::HandleMessage(SOCKET clientSocket, std::string message) {
 
 	for (auto package : packages) {
 		_scheduler->Add(clientSocket, package);
-
-		//std::cout << "HANDLE: [" + std::string(magic_enum::enum_name(package.Tag)) + "]: " + package.Content + "\n";
-		//switch (package.Tag) {
-		//case JoinGameRequest:
-		//	HandleJoinGameRequest(clientSocket, package.Content);
-		//	break;
-		//case DisconnectClientRequest:
-		//	HandleDisconnectClientRequest(clientSocket, package.Content);
-		//	break;
-		//case MoveRequest:
-		//	HandleMoveRequest(clientSocket, package.Content);
-		//	break;
-		//default:
-		//	break;
-		//}
 	}
-
 }
 
 void Server::HandleErrors(SOCKET clientSocket, int error) {
@@ -266,76 +250,6 @@ void Server::HandleErrors(SOCKET clientSocket, int error) {
 	}
 	default:
 		break;
-	}
-}
-
-void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageContent) {
-
-	JoinGameRequestData data(messageContent);
-
-	// we use -1 to mark a failed login
-	JoinGameResponseData response(-1);
-
-	Player* player = HandleLogin(data.Username, data.Password);
-	if (player == nullptr) {
-		Send(clientSocket, NetworkTags::JoinGameResponse, response.Serialize());
-		return;
-	}
-
-	Client* client = GetClient(clientSocket);
-	client->SetPlayer(player);
-	AddNewClientToIdDict(client->GetID(), client);
-	std::cout << "Created player for client with socket" << clientSocket << "and ID: " << client->GetID() << "\n";
-
-
-	// trimite informatiile despre noul client tuturor celorlalti
-	InfoConnectedClientData info{ client->GetID(), client->GetUsername() };
-	SendToAllExcept(clientSocket, InfoConnectedClient, info.Serialize());
-
-	//trimite raspuns la cel care a initiat logarea
-	response.Id = client->GetID();
-	response.Pos = client->GetPlayer()->GetPosition();
-	Send(clientSocket, NetworkTags::JoinGameResponse, response.Serialize());
-
-	//trimite info clientului nou despre toti clientii conectati
-	std::vector<InfoConnectedClientData> temp;
-	for (auto client : _conClients) {
-		if (client.first != clientSocket)
-			temp.push_back({ client.second->GetID(), client.second->GetUsername() });
-	}
-	InfoConnectedClientsData allConClients(temp);
-	Send(clientSocket, NetworkTags::InfoConnectedClients, allConClients.Serialize());
-
-
-}
-
-void Server::HandleDisconnectClientRequest(SOCKET clientSocket, std::string messageContent) {
-	DisconnectClient(clientSocket);
-}
-
-void Server::HandleMoveRequest(SOCKET clientSocket, std::string messageContent) {
-	MoveRequestData data(messageContent);
-
-	//update the magnitude so the user doesn't move faster than it is allowed
-	float magnitude = data.Movement.Length();
-	if (magnitude > MAX_MOVEMENT_MAGNITUDE) {
-		data.Movement = data.Movement.Normalize() * MAX_MOVEMENT_MAGNITUDE;
-	}
-
-	//update the position on the server
-	Player* player = _conClients[clientSocket]->GetPlayer();
-	if (player == nullptr)
-		return;
-	player->Move(data.Movement); //todo: add here some collision detection. and MOVE this
-	// MOVE this movement method. This should be called at the end of the loop in a loop for all palyers that moved
-	// easier to write parallel code like that
-
-	// don t send the new position, it will be to much traffic
-	//mark player as a moved player and send at the end of the frame the ifno about all players
-	if (_movedClientIds.find(player->GetId()) == _movedClientIds.end()) {
-
-		_movedClientIds.insert(player->GetId());
-		_movedClients.push_back({ player->GetId(), player->GetPosition() });
 	}
 }
 

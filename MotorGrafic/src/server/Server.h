@@ -19,6 +19,7 @@ class DatabaseManager;
 
 class Server { 
 	friend class  Scheduler;
+	friend class  BaseWorker;
 
 public:
 	static Server& GetInstance();
@@ -39,14 +40,7 @@ private:
 	void SendToAll(NetworkTags tag, std::string content);
 	void HandleMessage(SOCKET clientSocket, std::string message);
 	void HandleErrors(SOCKET clientSocket, int error);
-	/**
-	 * add to list
-	 * send to all client the new client
-	 * send to the new client all the existing clients
-	 */
-	void HandleJoinGameRequest(SOCKET clientSocket, std::string messageContent);
-	void HandleDisconnectClientRequest(SOCKET clientSocket, std::string messageContent);
-	void HandleMoveRequest(SOCKET clientSocket, std::string messageContent);
+
 
 	void DisconnectClient(SOCKET clientSocket);
 	bool CheckLogin(std::string usenrame, std::string pass) { return true; }

@@ -8,8 +8,17 @@ struct ScheudelerPackage {
 	NetworkPackage Package;
 };
 
+class BaseWorker;
+
 class Scheduler{
 public:
+	enum WorkerType {
+		CPU = 0,
+		GPU
+	};
+
+public:
+	Scheduler(WorkerType workerType);
 	void Add(SOCKET clientSocket, NetworkPackage package);
 
 	// Resolve all the apckeages stored
@@ -18,4 +27,5 @@ public:
 
 private:
 	std::queue<ScheudelerPackage> _packages;
+	BaseWorker* _worker;
 };

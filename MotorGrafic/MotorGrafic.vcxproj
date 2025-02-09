@@ -175,6 +175,8 @@
     <ClCompile Include="src\server\Scheduler.cpp" />
     <ClCompile Include="src\server\Server.cpp" />
     <ClCompile Include="src\server\shared\NetworkMessages.cpp" />
+    <ClCompile Include="src\server\workers\BaseWorker.cpp" />
+    <ClCompile Include="src\server\workers\CpuWorker.cpp" />
     <ClCompile Include="src\utils\Math.cpp" />
     <ClCompile Include="src\utils\Utils.cpp" />
     <ClCompile Include="src\utils\TGA.cpp" />
@@ -235,6 +237,8 @@
     <ClInclude Include="src\server\Scheduler.h" />
     <ClInclude Include="src\server\Server.h" />
     <ClInclude Include="src\server\shared\NetworkMessages.h" />
+    <ClInclude Include="src\server\workers\BaseWorker.h" />
+    <ClInclude Include="src\server\workers\CpuWorker.h" />
     <ClInclude Include="src\test.h" />
     <ClInclude Include="src\physics\BoxObject.h" />
     <ClInclude Include="src\physics\ObbObject.h" />

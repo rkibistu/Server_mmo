@@ -1,14 +1,25 @@
 #include "Scheduler.h"
 
-#include "Server.h"
+
+#include "server/workers/BaseWorker.h"
+#include "server/workers/CpuWorker.h"
+
+
+Scheduler::Scheduler(WorkerType workerType) {
+
+	if (workerType == WorkerType::CPU) {
+		_worker = new CpuWorker();
+	}
+	else {
+
+	}
+}
 
 void Scheduler::Add(SOCKET clientSocket, NetworkPackage package) {
 	_packages.push({ clientSocket, package });
 }
 
 void Scheduler::Resolve() {
-
-	Server& server = Server::GetInstance();
 
 	while (_packages.empty() == false) {
 
@@ -17,13 +28,13 @@ void Scheduler::Resolve() {
 
 		switch (package.Package.Tag) {
 		case JoinGameRequest:
-			server.HandleJoinGameRequest(package.ClientSocker, package.Package.Content);
+			_worker->HandleJoinGameRequest(package.ClientSocker, package.Package.Content);
 			break;
 		case DisconnectClientRequest:
-			server.HandleDisconnectClientRequest(package.ClientSocker, package.Package.Content);
+			_worker->HandleDisconnectClientRequest(package.ClientSocker, package.Package.Content);
 			break;
 		case MoveRequest:
-			server.HandleMoveRequest(package.ClientSocker, package.Package.Content);
+			_worker->HandleMoveRequest(package.ClientSocker, package.Package.Content);
 			break;
 		default:
 			break;
