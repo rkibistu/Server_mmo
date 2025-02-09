@@ -7,13 +7,14 @@
 #include "MemoryDebug.h"
 
 WindowObject* Engine::_window = nullptr;
-bool Engine::_consoleMode = false;
+bool Engine::_consoleMode = true;
 
 WindowObject* Engine::Init(rml::Vector2 windowResolution) {
 	if (!glfwInit())
 		exit(0);
 
-	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+	if (_consoleMode == true)
+		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
 	_window = new WindowObject(windowResolution);
 

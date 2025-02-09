@@ -4,19 +4,23 @@
 #include <string>
 #include <iostream>
 #include <nlohmanJson/json.hpp>
+#include <utils/Math.h>
 
 #include "../Client.h"
 
 
 enum NetworkTags {
-	JoinGameRequest,
-	JoinGameResponse,
+	JoinGameRequest, // login
+	JoinGameResponse,// succes/ failed (Id == -1 means failed)  + position in thw worled here
 
-	InfoConnectedClient,
-	InfoConnectedClients,
+	InfoConnectedClient, //send by the server to all cleints when a new client connects
+	InfoConnectedClients, // send to the new client, info about all the already connected client
 
-	DisconnectClientRequest,
-	DisconnectClientSignal,
+	DisconnectClientRequest, // a client announce that he is disconnecting
+	DisconnectClientSignal, // the server signals all the cleints about the disconnected one
+
+	MoveRequest, // a clients signal his desire to move
+	MoveResponse, // send the positions of all players that moved since last sent. Or, sent all position if the client is new
 
 	Invalid
 };
@@ -98,23 +102,30 @@ struct JoinGameRequestData {
 
 struct JoinGameResponseData {
 	int Id;
+	rml::Vector3 Pos;
 
-	JoinGameResponseData(int id) : Id(id) {}
+	JoinGameResponseData(int id, rml::Vector3 pos = rml::Vector3(0,0,0)) : Id(id), Pos(pos) {}
 
 	JoinGameResponseData(const std::string& serializedData) {
 		nlohmann::json j = nlohmann::json::parse(serializedData);
 		Id = j["Id"];
+		Pos.x = j["X"];
+		Pos.y = j["Y"];
+		Pos.z = j["Z"];
 	}
 
 	std::string Serialize() const {
 		nlohmann::json j;
 		j["Id"] = Id;
+		j["X"] = Pos.x;
+		j["Y"] = Pos.y;
+		j["Z"] = Pos.z;
 		return j.dump();
 	}
 
 	static JoinGameResponseData Deserialize(const std::string& data) {
 		nlohmann::json j = nlohmann::json::parse(data);
-		return { (int)j["Id"] };
+		return { (int)j["Id"], rml::Vector3(j["X"],j["Y"],j["Z"]) };
 	}
 };
 
@@ -198,3 +209,70 @@ struct DisconnectClientData {
 		return { (int)j["Id"] };
 	}
 };
+
+struct MoveData {
+	int Id;
+	rml::Vector3 Pos;
+
+	MoveData(int id, rml::Vector3 pos) : Id(id), Pos(pos) {}
+
+	MoveData(const std::string& serializedData) {
+		nlohmann::json j = nlohmann::json::parse(serializedData);
+		Id = j["Id"];
+		Pos.x = j["X"];
+		Pos.y = j["Y"];
+		Pos.z = j["Z"];
+	}
+
+	std::string Serialize() const {
+		nlohmann::json j;
+		j["Id"] = Id;
+		j["X"] = Pos.x;
+		j["Y"] = Pos.y;
+		j["Z"] = Pos.z;
+		return j.dump();
+	}
+
+	static MoveData Deserialize(const std::string& data) {
+		nlohmann::json j = nlohmann::json::parse(data);
+		return { (int)j["Id"], rml::Vector3(j["X"], j["Y"], j["Z"]) };
+	}
+};
+struct MoveResponseData {
+	std::vector<MoveData> MovedPlayers;
+
+	MoveResponseData() = default;
+
+	MoveResponseData(std::vector<MoveData> movedPlayers)
+		: MovedPlayers(std::move(movedPlayers)) {
+	}
+
+	MoveResponseData(const std::string& serializedData) {
+		nlohmann::json j = nlohmann::json::parse(serializedData);
+		for (const auto& item : j["Players"]) {
+			MovedPlayers.emplace_back(item.dump());
+		}
+	}
+
+	// Serialize the entire list to JSON string
+	std::string Serialize() const {
+		nlohmann::json j;
+		for (const auto& player : MovedPlayers) {
+			j["Players"].push_back(nlohmann::json::parse(player.Serialize()));
+		}
+		return j.dump();
+	}
+
+	// Static function to deserialize from a JSON string
+	static MoveResponseData Deserialize(const std::string& data) {
+		return MoveResponseData(data);
+	}
+};
+
+//nlohmann::json j;
+//j["Players"] = nlohmann::json::array();
+//for (const auto& client : MovedPlayers) {
+//	j["Players"].push_back({ {"Id", client.Id}, {j["X"] = client.Pos.x} ,{j["Y"] = client.Pos.y},{ j["Z"] = client.Pos.z } });
+//}
+//std::cout << j.dump() << std::endl;
+//return j.dump();

@@ -24,12 +24,12 @@ void Worlds::World5::FrameStart() {
 }
 
 void Worlds::World5::Update(float deltaTimeSeconds) {
-	World::Update(deltaTimeSeconds);
+	//World::Update(deltaTimeSeconds);
 
 }
 
 void Worlds::World5::Draw() {
-	World::Draw();
+	//World::Draw();
 }
 
 void Worlds::World5::FrameEnd() {

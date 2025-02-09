@@ -275,6 +275,7 @@ void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageConte
 
 	//trimite raspuns la cel care a initiat logarea
 	response.Id = client->GetID();
+	response.Pos = client->GetPlayer()->GetPosition();
 	Send(clientSocket, NetworkTags::JoinGameResponse, response.Serialize());
 
 	//trimite info clientului nou despre toti clientii conectati
@@ -285,6 +286,8 @@ void Server::HandleJoinGameRequest(SOCKET clientSocket, std::string messageConte
 	}
 	InfoConnectedClientsData allConClients(temp);
 	Send(clientSocket, NetworkTags::InfoConnectedClients, allConClients.Serialize());
+
+
 }
 
 void Server::HandleDisconnectClientRequest(SOCKET clientSocket, std::string messageContent) {
