@@ -5,9 +5,11 @@
 #include <iostream>
 #include <nlohmanJson/json.hpp>
 #include <utils/Math.h>
+#include <magic_enum/magic_enum.hpp>
 
 #include "../Client.h"
 
+#define MAX_MOVEMENT_MAGNITUDE 0.01
 
 enum NetworkTags {
 	JoinGameRequest, // login
@@ -47,26 +49,12 @@ public:
 	static std::string ParseMessage(std::string remainingMessage, std::string message, std::vector< NetworkPackage>& packages);
 
 	static NetworkTags FromString(std::string tag) {
-		if (tag == "JoinGameRequest") {
-			return NetworkTags::JoinGameRequest;
-		}
-		else if (tag == "JoinGameResponse") {
-			return NetworkTags::JoinGameResponse;
-		}
-		else if (tag == "InfoConnectedClient") {
-			return NetworkTags::InfoConnectedClient;
-		}
-		else if (tag == "InfoConnectedClients") {
-			return NetworkTags::InfoConnectedClients;
-		}
-		else if (tag == "DisconnectClientRequest") {
-			return NetworkTags::DisconnectClientRequest;
-		}
-		else if (tag == "DisconnectClientSignal") {
-			return NetworkTags::DisconnectClientSignal;
+		auto enumValue = magic_enum::enum_cast<NetworkTags>(tag); // Try to cast the string to the enum
+		if (enumValue.has_value()) {
+			return enumValue.value(); // Return the corresponding enum value
 		}
 		else {
-			return NetworkTags::Invalid;
+			return NetworkTags::Invalid; // Return Invalid if the tag doesn't match any enum value
 		}
 	}
 };
@@ -236,6 +224,31 @@ struct MoveData {
 	static MoveData Deserialize(const std::string& data) {
 		nlohmann::json j = nlohmann::json::parse(data);
 		return { (int)j["Id"], rml::Vector3(j["X"], j["Y"], j["Z"]) };
+	}
+};
+struct MoveRequestData {
+	rml::Vector3 Movement; // represent the movement vector
+
+	MoveRequestData(rml::Vector3 movement) : Movement(movement) {}
+
+	MoveRequestData(const std::string& serializedData) {
+		nlohmann::json j = nlohmann::json::parse(serializedData);
+		Movement.x = j["X"];
+		Movement.y = j["Y"];
+		Movement.z = j["Z"];
+	}
+
+	std::string Serialize() const {
+		nlohmann::json j;
+		j["X"] = Movement.x;
+		j["Y"] = Movement.y;
+		j["Z"] = Movement.z;
+		return j.dump();
+	}
+
+	static MoveRequestData Deserialize(const std::string& data) {
+		nlohmann::json j = nlohmann::json::parse(data);
+		return { rml::Vector3(j["X"], j["Y"], j["Z"]) };
 	}
 };
 struct MoveResponseData {

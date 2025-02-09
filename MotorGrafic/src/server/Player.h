@@ -23,6 +23,8 @@ public:
 	rml::Vector3 GetPosition() { return _position; }
 	void SetPosition(rml::Vector3& pos) { _position = pos; }
 
+	void Move(rml::Vector3 movement) { _position += movement; }
+
 private:
 	void Spawn();
 	void GenerateBoundingVolume(Mesh* mesh);

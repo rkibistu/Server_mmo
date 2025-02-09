@@ -163,6 +163,8 @@ void Server::CheckIncomingTraffic() {
 		_clientToDisconnect.clear();
 		std::cout << "Au ramas " << _conClients.size() << " conectati\n";
 	}
+
+	SendPositionUpdates();
 }
 
 
@@ -216,6 +218,10 @@ void Server::HandleMessage(SOCKET clientSocket, std::string message) {
 			break;
 		case DisconnectClientRequest:
 			HandleDisconnectClientRequest(clientSocket, package.Content);
+			break;
+		case MoveRequest:
+			HandleMoveRequest(clientSocket, package.Content);
+			break;
 		default:
 			break;
 		}
@@ -294,6 +300,32 @@ void Server::HandleDisconnectClientRequest(SOCKET clientSocket, std::string mess
 	DisconnectClient(clientSocket);
 }
 
+void Server::HandleMoveRequest(SOCKET clientSocket, std::string messageContent) {
+	MoveRequestData data(messageContent);
+
+	//update the magnitude so the user doesn't move faster than it is allowed
+	float magnitude = data.Movement.Length();
+	if (magnitude > MAX_MOVEMENT_MAGNITUDE) {
+		data.Movement = data.Movement.Normalize() * MAX_MOVEMENT_MAGNITUDE;
+	}
+
+	//update the position on the server
+	Player* player = _conClients[clientSocket]->GetPlayer();
+	if (player == nullptr)
+		return;
+	player->Move(data.Movement); //todo: add here some collision detection. and MOVE this
+	// MOVE this movement method. This should be called at the end of the loop in a loop for all palyers that moved
+	// easier to write parallel code like that
+
+	// don t send the new position, it will be to much traffic
+	//mark player as a moved player and send at the end of the frame the ifno about all players
+	if (_movedClientIds.find(player->GetId()) == _movedClientIds.end()) {
+
+		_movedClientIds.insert(player->GetId());
+		_movedClients.push_back({ player->GetId(), player->GetPosition() });
+	}
+}
+
 void Server::DisconnectClient(SOCKET clientSocket) {
 	if (_conClients.find(clientSocket) == _conClients.end()) {
 		std::cout << "[ERROR]: Tried to disconnect a client that didn;t exist in the dictionary. Check it!\n";
@@ -331,6 +363,17 @@ Player* Server::HandleLogin(std::string username, std::string pass) {
 
 	player = new Player(user.Id, user.Username, rml::Vector3(user.PosX, user.PosY, user.PosZ));
 	return player;
+}
+
+void Server::SendPositionUpdates() {
+	if (_movedClients.size() <= 0)
+		return;
+
+	MoveResponseData data(_movedClients);
+	SendToAll(NetworkTags::MoveResponse, data.Serialize());
+
+	_movedClients.clear();
+	_movedClientIds.clear();
 }
 
 void Server::AddNewClient(SOCKET fd) {

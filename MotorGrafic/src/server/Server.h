@@ -8,12 +8,14 @@
 #include <unordered_map>
 #include <windows.h>
 #include <ws2tcpip.h>
+#include <unordered_set>
 
 #include "server/shared/NetworkMessages.h"
 
 
 class Client;
 class DatabaseManager;
+
 
 class Server {
 public:
@@ -42,10 +44,14 @@ private:
 	 */
 	void HandleJoinGameRequest(SOCKET clientSocket, std::string messageContent);
 	void HandleDisconnectClientRequest(SOCKET clientSocket, std::string messageContent);
+	void HandleMoveRequest(SOCKET clientSocket, std::string messageContent);
 
 	void DisconnectClient(SOCKET clientSocket);
 	bool CheckLogin(std::string usenrame, std::string pass) { return true; }
 	Player* HandleLogin(std::string username, std::string pass);
+
+	//consume the _movedClients vector and send messages to all clients about the new positions
+	void SendPositionUpdates();
 
 	// Create and add a new cleint to <socket,client> dictionary
 	void AddNewClient(SOCKET fd);
@@ -82,4 +88,10 @@ private:
 
 	DatabaseManager* _dbManager;
 	static int _clientIdsTemp;
+
+	//Movement
+	//clients that were moved and need to send info to clients about them
+	std::vector<MoveData> _movedClients;
+	//we use this for farst cehck if a cleint is already aadded to _movedClients vector
+	std::unordered_set<int> _movedClientIds;
 };
