@@ -11,13 +11,15 @@
 #include <unordered_set>
 
 #include "server/shared/NetworkMessages.h"
-
+#include "server/Scheduler.h"
 
 class Client;
 class DatabaseManager;
 
 
-class Server {
+class Server { 
+	friend class  Scheduler;
+
 public:
 	static Server& GetInstance();
 	// Close server
@@ -88,6 +90,8 @@ private:
 
 	DatabaseManager* _dbManager;
 	static int _clientIdsTemp;
+
+	Scheduler* _scheduler;
 
 	//Movement
 	//clients that were moved and need to send info to clients about them

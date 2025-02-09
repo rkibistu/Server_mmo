@@ -27,6 +27,12 @@ void Server::DestroyInstance() {
 
 	Close();
 
+
+	if (_dbManager)
+		delete _dbManager;
+	if (_scheduler)
+		delete _scheduler;
+
 	if (_spInstance)
 		delete _spInstance;
 }
@@ -92,6 +98,7 @@ bool Server::Init() {
 	_clients.push_back({ _listenSocket, POLLRDNORM, 0 });
 
 	_dbManager = new DatabaseManager();
+	_scheduler = new Scheduler();
 	// Insert a test user
 	//_dbManager->insertUser("testUser", "testPass", 1.1, 2.2, 3.3);
 
@@ -143,6 +150,7 @@ void Server::CheckIncomingTraffic() {
 		}
 	}
 
+	//disconnect cclients marked so
 	if (_clientToDisconnect.size() > 0) {
 		for (int i = 0; i < _clientToDisconnect.size(); i++) {
 			if (_conClients.find(_clientToDisconnect[i]) != _conClients.end()) {
@@ -164,9 +172,11 @@ void Server::CheckIncomingTraffic() {
 		std::cout << "Au ramas " << _conClients.size() << " conectati\n";
 	}
 
+	_scheduler->Resolve();
+
+	//update positions
 	SendPositionUpdates();
 }
-
 
 void Server::Send(SOCKET clientSocket, NetworkTags tag, std::string content) {
 	std::string message = NetworkMessages::PrepareMessage(tag, content);
@@ -185,7 +195,7 @@ void Server::Send(SOCKET clientSocket, NetworkTags tag, std::string content) {
 		totalSent += bytesSent;
 	}
 
-	std::cout << "SENT: [" << magic_enum::enum_name(tag) << "]: " << content << std::endl;
+	//std::cout << "SENT: [" << magic_enum::enum_name(tag) << "]: " << content << std::endl;
 }
 
 void Server::SendToAllExcept(SOCKET clientSocket, NetworkTags tag, std::string content) {
@@ -211,20 +221,22 @@ void Server::HandleMessage(SOCKET clientSocket, std::string message) {
 	_conClients[clientSocket]->RemainingMessage = remainingMessage;
 
 	for (auto package : packages) {
+		_scheduler->Add(clientSocket, package);
+
 		//std::cout << "HANDLE: [" + std::string(magic_enum::enum_name(package.Tag)) + "]: " + package.Content + "\n";
-		switch (package.Tag) {
-		case JoinGameRequest:
-			HandleJoinGameRequest(clientSocket, package.Content);
-			break;
-		case DisconnectClientRequest:
-			HandleDisconnectClientRequest(clientSocket, package.Content);
-			break;
-		case MoveRequest:
-			HandleMoveRequest(clientSocket, package.Content);
-			break;
-		default:
-			break;
-		}
+		//switch (package.Tag) {
+		//case JoinGameRequest:
+		//	HandleJoinGameRequest(clientSocket, package.Content);
+		//	break;
+		//case DisconnectClientRequest:
+		//	HandleDisconnectClientRequest(clientSocket, package.Content);
+		//	break;
+		//case MoveRequest:
+		//	HandleMoveRequest(clientSocket, package.Content);
+		//	break;
+		//default:
+		//	break;
+		//}
 	}
 
 }

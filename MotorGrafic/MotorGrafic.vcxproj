@@ -172,6 +172,7 @@
     <ClCompile Include="src\physics\SphereObject.cpp" />
     <ClCompile Include="src\server\Client.cpp" />
     <ClCompile Include="src\server\Player.cpp" />
+    <ClCompile Include="src\server\Scheduler.cpp" />
     <ClCompile Include="src\server\Server.cpp" />
     <ClCompile Include="src\server\shared\NetworkMessages.cpp" />
     <ClCompile Include="src\utils\Math.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="src\server\Client.h" />
     <ClInclude Include="src\server\DatabaseManager.h" />
     <ClInclude Include="src\server\Player.h" />
+    <ClInclude Include="src\server\Scheduler.h" />
     <ClInclude Include="src\server\Server.h" />
     <ClInclude Include="src\server\shared\NetworkMessages.h" />
     <ClInclude Include="src\test.h" />
