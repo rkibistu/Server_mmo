@@ -175,6 +175,7 @@ void Server::CheckIncomingTraffic() {
 	_scheduler->Resolve();
 
 	//update positions
+	
 	SendPositionUpdates();
 }
 

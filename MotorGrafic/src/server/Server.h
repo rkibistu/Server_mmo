@@ -19,7 +19,11 @@ class DatabaseManager;
 
 class Server { 
 	friend class  Scheduler;
+
+	//workers
 	friend class  BaseWorker;
+	friend class  CpuWorker;
+	friend class  GpuWorker;
 
 public:
 	static Server& GetInstance();

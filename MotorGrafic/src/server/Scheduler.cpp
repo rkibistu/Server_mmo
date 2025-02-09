@@ -40,4 +40,7 @@ void Scheduler::Resolve() {
 			break;
 		}
 	}
+
+	//after all packages were handled
+	_worker->ResolveMovement();
 }

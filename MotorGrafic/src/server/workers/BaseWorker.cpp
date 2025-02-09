@@ -56,18 +56,19 @@ void BaseWorker::HandleMoveRequest(SOCKET clientSocket, std::string messageConte
 	}
 
 	//update the position on the server
+	// We update the position when we get the request
+	// Later, we will check if the movement resulted in a collision and roll it back
 	Player* player = server._conClients[clientSocket]->GetPlayer();
 	if (player == nullptr)
 		return;
-	player->Move(data.Movement); //todo: add here some collision detection. and MOVE this
-	// MOVE this movement method. This should be called at the end of the loop in a loop for all palyers that moved
-	// easier to write parallel code like that
+	player->Move(data.Movement); 
+	player->AccumulateMovement(data.Movement);
 
 	// don t send the new position, it will be to much traffic
 	//mark player as a moved player and send at the end of the frame the ifno about all players
 	if (server._movedClientIds.find(player->GetId()) == server._movedClientIds.end()) {
 
 		server._movedClientIds.insert(player->GetId());
-		server._movedClients.push_back({ player->GetId(), player->GetPosition() });
+		server._movedClients.push_back({ player->GetId(), player->GetPosition(), data.Movement });
 	}
 }

@@ -10,6 +10,7 @@
 #include "../Client.h"
 
 #define MAX_MOVEMENT_MAGNITUDE 0.01
+#define MAX_CONNECTIONS 1000
 
 enum NetworkTags {
 	JoinGameRequest, // login
@@ -201,8 +202,10 @@ struct DisconnectClientData {
 struct MoveData {
 	int Id;
 	rml::Vector3 Pos;
+	rml::Vector3 Movement; // This is the vector movement used to move the player
+							//it is not send over the networked, sued itnernally for rolleback movements
 
-	MoveData(int id, rml::Vector3 pos) : Id(id), Pos(pos) {}
+	MoveData(int id, rml::Vector3 pos, rml::Vector3 movement = rml::Vector3(0,0,0)) : Id(id), Pos(pos) {}
 
 	MoveData(const std::string& serializedData) {
 		nlohmann::json j = nlohmann::json::parse(serializedData);

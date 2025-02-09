@@ -13,7 +13,7 @@ struct BoundingVolume {
 // This represents a loggedIn client
 // This is something that exist (is spawned) only after a succesful login
 // This is used to represent the client in the world 
-class Player{
+class Player {
 public:
 	Player(int id, std::string username, rml::Vector3 position);
 
@@ -23,7 +23,17 @@ public:
 	rml::Vector3 GetPosition() { return _position; }
 	void SetPosition(rml::Vector3& pos) { _position = pos; }
 
+	//Gets the bounding volume updated based on position
+	BoundingVolume GetTransformedBoundingVolume() { return { _boundingVolume.Min + _position, _boundingVolume.Max + _position }; }
+
 	void Move(rml::Vector3 movement) { _position += movement; }
+
+	void AccumulateMovement(rml::Vector3 movement) { _accumulatedMovement += movement; }
+	void ResetAccumulatedMovement() { _accumulatedMovement = rml::Vector3(0, 0, 0); }
+	void RollbackMovement() {
+		_position -= _accumulatedMovement;
+		ResetAccumulatedMovement();
+	}
 
 private:
 	void Spawn();
@@ -32,7 +42,7 @@ private:
 private:
 	int _id;
 	std::string _username;
-	
+
 	// All i need to know is the position and the bounding volume
 	// Movement is based on movement from client
 	// So i don t need velocity or other things
@@ -41,4 +51,6 @@ private:
 	// object so we can render it
 	rml::Vector3 _position;
 	BoundingVolume _boundingVolume;
+
+	rml::Vector3 _accumulatedMovement = rml::Vector3(0, 0, 0);
 };
