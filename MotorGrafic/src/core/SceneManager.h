@@ -9,7 +9,7 @@
 #include <components/LightObject.h>
 #include "core/culling/Frustrum.h"
 
-#include <core/SceneManagers/iSceneMangerImplementation.h>
+#include "SceneManagers/SceneManagerImplementationBase.h"
 
 /**
  * Singleton class used to manage all objects that exist in the world.

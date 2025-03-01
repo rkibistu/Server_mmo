@@ -120,9 +120,6 @@
     <ClCompile Include="src\core\SceneManagers\SceneManagerImplementationBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\SceneManagers\SceneManagerAoS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\worlds\world5_mmo\World5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -273,9 +270,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\SceneManagers\iSceneMangerImplementation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\SceneManagers\SceneManagerAoS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\SceneManagers\SceneManagerSoA.h">

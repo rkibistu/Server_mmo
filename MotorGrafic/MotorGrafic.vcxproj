@@ -159,7 +159,6 @@
     <ClCompile Include="src\components\Camera.cpp" />
     <ClCompile Include="src\core\Engine.cpp" />
     <ClCompile Include="src\core\InputController.cpp" />
-    <ClCompile Include="src\core\SceneManagers\SceneManagerAoS.cpp" />
     <ClCompile Include="src\core\SceneManagers\SceneManagerImplementationBase.cpp" />
     <ClCompile Include="src\core\SceneManagers\SceneManagerImplementationBase.h" />
     <ClCompile Include="src\core\SceneXmlParser.cpp" />
@@ -225,7 +224,6 @@
     <ClInclude Include="src\core\Engine.h" />
     <ClInclude Include="src\core\InputController.h" />
     <ClInclude Include="src\core\SceneManagers\iSceneMangerImplementation.h" />
-    <ClInclude Include="src\core\SceneManagers\SceneManagerAoS.h" />
     <ClInclude Include="src\core\SceneManagers\SceneManagerSoA.h" />
     <ClInclude Include="src\core\SceneXmlParser.h" />
     <ClInclude Include="src\core\window\WindowCallbacks.h" />

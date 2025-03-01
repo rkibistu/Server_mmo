@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "SceneManager.h"
-#include "SceneManagers/SceneManagerAoS.h"
 #include "ResourceManager.h"
 #include "SceneXmlParser.h"
 #include "Renderer.h"
@@ -116,7 +115,7 @@ Camera* SceneManager::GetCamera(std::string name) {
 
 SceneManager::SceneManager() {
 
-	_implementation = new SceneManagerAoS();
+	_implementation = new SceneManagerImplementationBase();
 }
 
 void SceneManager::InsertObjectToOctree(iSceneObject* object) {
